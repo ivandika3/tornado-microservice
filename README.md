@@ -117,6 +117,24 @@ Response:
 }
 ```
 
+##### Get specific user
+Retrieve a user by ID
+```
+URL: GET /users/{id}
+```
+```json
+Response:
+{
+    "result": true,
+    "user": {
+        "id": 1,
+        "name": "Suresh Subramaniam",
+        "created_at": 1475820997000000,
+        "updated_at": 1475820997000000,
+    }
+}
+```
+
 ##### Create user
 ```
 URL: POST /users
