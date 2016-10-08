@@ -1,5 +1,5 @@
-# 99-python-exercise
-An exercise to assess your skills with Python, Tornado (Web Framework), and writing non-blocking/asynchronous code.
+# Python Exercise
+An exercise to assess your skills with Python, Tornado (Web Framework), and writing non-blocking/asynchronous code. Create a fork of this repository to begin solving the exercise!
 
 ## Introduction
 We're building a system that stores information about users and properties that are available to rent or buy. The system is designed as a set of small web applications that each perform a specific task (otherwise known as "microservices").
@@ -224,7 +224,7 @@ Content-Type: application/json
 Request body: (JSON body)
 {
     "user_id": 1,
-    "listing_type": "rent" or "sale",
+    "listing_type": "rent",
     "price": 6000
 }
 ```
@@ -245,7 +245,7 @@ Response:
 ## Requirements
 The listing service has been built already. You need to build the remaining two components: the user service and the public API layer. The implementation of the listing service can serve as a good starting point to learn more about how to structure a web application using the Tornado web framework.
 
-## Getting Started
+## Setup
 We will be using Python 3 for this exercise.
 
 ### Install pip
@@ -284,7 +284,7 @@ python listing_service.py --port=8888 --debug=true
 Settings that can be specified when running the app:
 
 - `port`: The port number to run the application on
-- `debug`: Runs the application in debug mode. Applications running in debug mode 
+- `debug`: Runs the application in debug mode. Applications running in debug mode automatically reload file changes
 
 ### Create listings
 Time to add some data into the listing service!
