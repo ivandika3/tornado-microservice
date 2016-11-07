@@ -117,6 +117,24 @@ Response:
 }
 ```
 
+##### Get specific user
+Retrieve a user by ID
+```
+URL: GET /users/{id}
+```
+```json
+Response:
+{
+    "result": true,
+    "user": {
+        "id": 1,
+        "name": "Suresh Subramaniam",
+        "created_at": 1475820997000000,
+        "updated_at": 1475820997000000,
+    }
+}
+```
+
 ##### Create user
 ```
 URL: POST /users
@@ -206,7 +224,7 @@ Content-Type: application/json
 Request body: (JSON body)
 {
     "user_id": 1,
-    "listing_type": "rent" or "sale",
+    "listing_type": "rent",
     "price": 6000
 }
 ```
@@ -229,7 +247,7 @@ The listing service has been built already. You need to build the remaining two 
 
 The first priority would be to get a working system up and running! A great submission would demonstrate a grasp of the principles of microservice architecture.
 
-## Getting Started
+## Setup
 We will be using Python 3 for this exercise.
 
 ### Install pip
