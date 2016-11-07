@@ -282,7 +282,7 @@ tornado==4.4.2
 ### Run the listing service
 Now we're all set to run the listing service!
 
-```
+```bash
 # Run the listing service
 python listing_service.py --port=6000 --debug=true
 ```
