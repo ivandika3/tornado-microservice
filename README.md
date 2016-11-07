@@ -1,13 +1,13 @@
-# 99-python-exercise
+# Backend Tech Challenge
 An exercise to assess your skills with Python, Tornado (Web Framework), and writing non-blocking/asynchronous code.
 
 ## Introduction
 We're building a system that stores information about users and properties that are available to rent or buy. The system is designed as a set of small web applications that each perform a specific task (otherwise known as "microservices").
 
-Some parts of the system have been built already. We need to your help to complete what's left!
+Some parts of the system have been built already. We need to your help to complete the rest!
 
 ### Architecture
-This system comprises of 3 web applications:
+This system comprises of 3 independent web applications:
 
 - **Listing service:** Stores all the information about properties that are available to rent and buy
 - **User service:** Stores information about all the users in the system
@@ -15,9 +15,9 @@ This system comprises of 3 web applications:
 
 The listing service and user service are backed by relevant databases to persist data. The services are essentially a wrapper around their respective databases to manipulate the data stored in them. For this reason, the services are not intended to be directly accessible by any external client/application.
 
-Services are free to store the data in any format they wish (in a SQL table, or as a document in a NoSQL db, etc.). The only requirement is for them to expose a set of REST APIs that return data in a standardised JSON format.
+Services are free to store the data in any format they wish (in a SQL table, or as a document in a NoSQL db, etc.). The only requirement is for them to expose a set of REST APIs that return data in a standardised JSON format. Services are the guardians/gatekeepers for their respective databases. Any other application/service that wishes to access the data must go solely through the REST APIs exposed by the service. It cannot access the data directly from the database at any cost.
 
-How does the mobile app or user-facing website access the data in the system? This is where the public API layer comes in. The public API layer is a web application that contains APIs that can be called by external clients/applications. This web application is responsible for interacting with the listing/user service to pull out the relevant data and return it to the external caller in the appropriate format.
+How does the mobile app or user-facing website access the data in the system? This is where the public API layer comes in. The public API layer is a web application that contains APIs that can be called by external clients/applications. This web application is responsible for interacting with the listing/user service through its APIs to pull out the relevant data and return it to the external caller in the appropriate format.
 
 ### 1) Listing Service
 The listing service stores information about properties that are available to rent or buy. These are the fields available in a listing object:
@@ -227,6 +227,8 @@ Response:
 ## Requirements
 The listing service has been built already. You need to build the remaining two components: the user service and the public API layer. The implementation of the listing service can serve as a good starting point to learn more about how to structure a web application using the Tornado web framework.
 
+The first priority would be to get a working system up and running! A great submission would demonstrate a grasp of the principles of microservice architecture.
+
 ## Getting Started
 We will be using Python 3 for this exercise.
 
@@ -240,10 +242,13 @@ We use virtualenv to create an isolated running environment to install dependenc
 Once you have pip and virtualenv set up, we can proceed to create the environment to run our web applications:
 
 ```bash
-# Creates the virtual environment in a folder named "env" in the current directory
-virtualenv env
+# Locate the path for the Python 3 installation
+which python3
 
-# Starting the virtual environment
+# Create the virtual environment in a folder named "env" in the current directory
+virtualenv env --python=<path_to_python_3>
+
+# Start the virtual environment
 source env/bin/activate
 
 # Install the required dependencies/libraries
@@ -261,12 +266,12 @@ Now we're all set to run the listing service!
 
 ```
 # Run the listing service
-python listing_service.py --port=8888 --debug=true
+python listing_service.py --port=6000 --debug=true
 ```
-Settings that can be specified when running the app:
+The following settings that can be configured via command-line arguments when starting the app:
 
-- `port`: The port number to run the application on
-- `debug`: Runs the application in debug mode. Applications running in debug mode 
+- `port`: The port number to run the application on (default: `6000`)
+- `debug`: Runs the application in debug mode. Applications running in debug mode will automatically reload in response to file changes. (default: `true`)
 
 ### Create listings
 Time to add some data into the listing service!
