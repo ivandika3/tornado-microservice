@@ -247,6 +247,8 @@ The listing service has been built already. You need to build the remaining two 
 
 The first priority would be to get a working system up and running! A great submission would demonstrate a grasp of the principles of microservice architecture.
 
+You are required to use tornado's built in framework for HTTP request.
+
 ## Setup
 We will be using Python 3 for this exercise.
 
