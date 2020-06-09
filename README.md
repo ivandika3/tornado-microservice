@@ -1,8 +1,10 @@
 # Backend Tech Challenge
-An exercise to assess your skills with Python, Tornado (Web Framework), and writing non-blocking/asynchronous code.
+An exercise to assess your skills with Python, [Tornado](http://tornadoweb.org/) (Web Framework), writing non-blocking/asynchronous code, and microservices architecture.
 
 ## Introduction
 We're building a system that stores information about users and properties that are available to rent or buy. The system is designed as a set of small web applications that each perform a specific task (otherwise known as "microservices").
+
+Please read [the Wikipedia article about microservices](https://en.wikipedia.org/wiki/Microservices) if you are not familar with the architecture before.
 
 Some parts of the system have been built already. We need to your help to complete the rest!
 
