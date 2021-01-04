@@ -299,7 +299,7 @@ The following settings that can be configured via command-line arguments when st
 Time to add some data into the listing service!
 
 ```bash
-curl localhost:8888/listings -XPOST \
+curl localhost:6000/listings -XPOST \
     -d user_id=1 \
     -d listing_type=rent \
     -d price=4500
