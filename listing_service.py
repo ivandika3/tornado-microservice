@@ -32,6 +32,7 @@ class App(tornado.web.Application):
         )
         self.db.commit()
 
+# Will be derived by the other request handlers
 class BaseHandler(tornado.web.RequestHandler):
     def write_json(self, obj, status_code=200):
         self.set_header("Content-Type", "application/json")
@@ -178,6 +179,7 @@ class PingHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("pong!")
 
+# Path to the request handler
 def make_app(options):
     return App([
         (r"/listings/ping", PingHandler),
