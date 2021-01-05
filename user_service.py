@@ -92,3 +92,50 @@ class UsersHandler(BaseHandler):
         
         self.write_json({"result": True, "users": users})
 
+    @tornado.gen.coroutine
+    def post(self):
+        # Collecting required params
+        name = self.get_argument("name")
+        
+        # Validating inputs
+        errors = []
+        name = self._validate_name(name, errors)
+        time_now = int(time.time() * 1e6) # Converting current time to microseconds
+        
+        # End if we have any validation errors
+        if len(errors) > 0:
+            self.write_json({"result": False, "errors": errors}, status_code=400)
+            return
+
+        # Proceed to store the listing in our db
+        cursor = self.application.db.cursor()
+        cursor.execute(
+            "INSERT INTO 'users' "
+            + "('name', 'created_at', 'updated_at') "
+            + "VALUES (?, ?, ?, ?, ?)",
+            (name, time_now, time_now)
+        )
+        self.application.db.commit()
+
+        # Error out if we fail to retrieve the newly created user
+        if cursor.lastrowid is None:
+            self.write_json({"result": False, "errors": ["Error while adding user to db"]}, status_code=500)
+            return
+
+        user = dict(
+            id=cursor.lastrowid,
+            name=name,
+            created_at=time_now,
+            created_at=time_now
+        )
+
+        self.write_json({"result": True, "listing": listing})
+    
+    def _validate_name(self, name, errors):
+        try:
+            name = str(name)
+            return name
+        except Exception as e:
+            logging.exception("Error while converting name to str: {}".format(name))
+            errors.append("invalid name")
+            return None
