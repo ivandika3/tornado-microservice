@@ -139,3 +139,31 @@ class UsersHandler(BaseHandler):
             logging.exception("Error while converting name to str: {}".format(name))
             errors.append("invalid name")
             return None
+    
+# Path to the request handler
+def make_app(options):
+    return App([
+        (r"/users/^[a-zA-Z\s]*$", UsersHandler)
+    ], debug=options.debug)
+
+if __name__ == "__main__":
+     # Define settings/options for the web app
+    # Specify the port number to start the web app on (default value is port 8000)
+    tornado.options.define("port", default=8000)
+    # Specify whether the app should run in debug mode
+    # Debug mode restarts the app automatically on file changes
+    tornado.options.define("debug", default=True)
+
+    # Read settings/options from command line
+    tornado.options.parse_command_line()
+
+    # Access the settings defined
+    options = tornado.options.options
+
+    # Create web app
+    app = make_app(options)
+    app.listen(options.port)
+    logging.info("Starting listing service. PORT: {}, DEBUG: {}".format(options.port, options.debug))
+
+    # Start event loop
+    tornado.ioloop.IOLoop.instance().start()
