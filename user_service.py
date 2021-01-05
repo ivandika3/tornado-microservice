@@ -96,6 +96,7 @@ class UsersHandler(BaseHandler):
     def post(self):
         # Collecting required params
         name = self.get_argument("name")
+        print("name is ", name)
         
         # Validating inputs
         errors = []
@@ -112,7 +113,7 @@ class UsersHandler(BaseHandler):
         cursor.execute(
             "INSERT INTO 'users' "
             + "('name', 'created_at', 'updated_at') "
-            + "VALUES (?, ?, ?, ?, ?)",
+            + "VALUES (?, ?, ?)",
             (name, time_now, time_now)
         )
         self.application.db.commit()
@@ -126,10 +127,9 @@ class UsersHandler(BaseHandler):
             id=cursor.lastrowid,
             name=name,
             created_at=time_now,
-            created_at=time_now
         )
 
-        self.write_json({"result": True, "listing": listing})
+        self.write_json({"result": True, "user": user})
     
     def _validate_name(self, name, errors):
         try:
@@ -143,6 +143,7 @@ class UsersHandler(BaseHandler):
 # Path to the request handler
 def make_app(options):
     return App([
+        (r"/users", UsersHandler),
         (r"/users/^[a-zA-Z\s]*$", UsersHandler)
     ], debug=options.debug)
 
