@@ -7,7 +7,6 @@ import logging
 import json
 
 # TODO: use env
-# CONSTANTS
 LISTINGS_URL = "http://localhost:6000/listings"
 USERS_URL = "http://localhost:8000/users"
 
@@ -54,31 +53,38 @@ class ListingsHandler(BaseHandler):
         # Decided to use approach 1
 
         http_client = AsyncHTTPClient()
-        if user_id is not None:
-            # Preparing URL parameters
-            listingParams = {"user_id": user_id}
-            listingsURL = url_concat(LISTING_URL, listingParams)
-            userURL = USERS_URL + "/" + str(user_id)
+        try :
+            if user_id is not None:
+                # Preparing URL parameters
+                listingParams = {"user_id": user_id}
+                listingsURL = url_concat(LISTING_URL, listingParams)
+                userURL = USERS_URL + "/" + str(user_id)
 
-            listingsResp, usersResp = yield [http_client.fetch(listingsURL), http_client.fetch(usersURL)]
-            listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
-            user = json.loads(usersResp.body.decode('utf-8'))['user']
+                listingsResp, usersResp = yield [http_client.fetch(listingsURL), http_client.fetch(usersURL)]
+                listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
+                user = json.loads(usersResp.body.decode('utf-8'))['user']
+                # TODO: If there is no user under that user_id - Foreign key constraints is violated
 
-            for listing in listings:
-                listing['user'] = user
-        else:
-            listingsResp = yield http_client.fetch(LISTINGS_URL)
-            listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
+                for listing in listings:
+                    listing['user'] = user
+            else:
+                listingsResp = yield http_client.fetch(LISTINGS_URL)
+                listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
 
-            for listing in listings:
-                usersURL = USERS_URL + "/" + str(listing['user_id'])
-                userResp = yield http_client.fetch(USERS_URL + "/" + str(listing['user_id']))
-                user = json.loads(userResp.body.decode('utf-8'))['user']
-                listing['user'] = user
+                for listing in listings:
+                    usersURL = USERS_URL + "/" + str(listing['user_id'])
+                    userResp = yield http_client.fetch(USERS_URL + "/" + str(listing['user_id']))
+
+                    user = json.loads(userResp.body.decode('utf-8'))['user']
+                    listing['user'] = user
+
+        except Exception as e:
+            http_client.close()
+            self.write_json({"result": False, "errors": str(e)}, status_code=404)
+            return
 
         http_client.close()
-        self.write_json({"result": True, "listings": listings})
-        # If there is no user under that user_id - Foreign key constraints is violated
+        self.write_json({"result": True, "listings": listings}, status_code=200)
 
     # TODO: DELETE IF NOT IN USE
     # @tornado.gen.coroutine
@@ -104,6 +110,14 @@ class UsersHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
         self.write_json({"result": False, "errors": "not implemented yet"}, status_code=400)
+
+# TODO: Remove if not in use
+class InvalidUserIDError(Exception):
+    # Exception raised when listings refer to user_id that does not exist
+    # Acts as a foreign key constraint checker
+
+    def __init__(self, message="One or more entries in listings are referring to user_id that does not exist."):
+        self.message = message
 
 
 # Path to the request handler
