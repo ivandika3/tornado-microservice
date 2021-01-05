@@ -40,7 +40,7 @@ class BaseHandler(tornado.web.RequestHandler):
 # /users
 class UsersHandler(BaseHandler):
     @tornado.gen.coroutine
-    def get(self, name):
+    def get(self):
         # Parsing pagination params
         page_num = self.get_argument("page_num", 1)
         page_size = self.get_argument("page_size", 10)
@@ -58,14 +58,6 @@ class UsersHandler(BaseHandler):
             self.write_json({"result": False, "errors": "invalid page_size"}, status_code=400)
             return
         
-        # # Parsing name param
-        if name is not None:
-            try:
-                name = str(name)
-            except:
-                self.write_json({"result": False, "errors": "invalid name"}, status_code=400)
-                return
-        
         # Building select statement
         select_stmt = "SELECT * FROM users"
         
@@ -74,11 +66,7 @@ class UsersHandler(BaseHandler):
         offset = (page_num - 1) * page_size
         select_stmt += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
 
-        # Fetching listings from db
-        if name is not None:
-            args = (name, limit, offset)
-        else: 
-            args = (limit, offset)
+        args = (limit, offset)
         cursor = self.application.db.cursor()
         results = cursor.execute(select_stmt, args)
 
@@ -96,7 +84,6 @@ class UsersHandler(BaseHandler):
     def post(self):
         # Collecting required params
         name = self.get_argument("name")
-        print("name is ", name)
         
         # Validating inputs
         errors = []
@@ -127,6 +114,7 @@ class UsersHandler(BaseHandler):
             id=cursor.lastrowid,
             name=name,
             created_at=time_now,
+            updated_at=time_now
         )
 
         self.write_json({"result": True, "user": user})
@@ -139,12 +127,48 @@ class UsersHandler(BaseHandler):
             logging.exception("Error while converting name to str: {}".format(name))
             errors.append("invalid name")
             return None
-    
+
+# /users/{id}
+class UserHandler(BaseHandler):
+    @tornado.gen.coroutine
+    def get(self, id):
+        # Parsing id 
+        if id is not None:
+            try:
+                id = int(id)
+            except:
+                self.write_json({"result": False, "errors": "invalid id"}, status_code=400)
+                return
+        
+        # Building select statement
+        select_stmt = "SELECT * FROM users WHERE id=?"
+
+        args = (id,)
+        cursor = self.application.db.cursor()
+        results = cursor.execute("SELECT * FROM users WHERE id=?", args)
+
+        users = []
+        for row in results:
+            fields = ["id", "name", "created_at", "updated_at"]
+            user = {
+                field: row[field] for field in fields
+            }
+            users.append(user)
+
+        if len(users) == 0:
+            self.write_json({"result": False, "errors": "no user found under the id"}, status_code=404)
+            return
+        elif len(users) > 1:
+            self.write_json({"result": False, "errors": "more than one users registered under the same id"}, status_code=400)
+            return
+        
+        self.write_json({"result": True, "user": users[0]})
+
 # Path to the request handler
 def make_app(options):
     return App([
         (r"/users", UsersHandler),
-        (r"/users/^[a-zA-Z\s]*$", UsersHandler)
+        (r"/users/([0-9]+)", UserHandler)
     ], debug=options.debug)
 
 if __name__ == "__main__":
@@ -164,7 +188,7 @@ if __name__ == "__main__":
     # Create web app
     app = make_app(options)
     app.listen(options.port)
-    logging.info("Starting listing service. PORT: {}, DEBUG: {}".format(options.port, options.debug))
+    logging.info("Starting user service. PORT: {}, DEBUG: {}".format(options.port, options.debug))
 
     # Start event loop
     tornado.ioloop.IOLoop.instance().start()
