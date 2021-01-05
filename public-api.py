@@ -45,16 +45,7 @@ class ListingsHandler(BaseHandler):
                 self.write_json({"result": False, "errors": "invalid user_id"}, status_code=400)
                 return
 
-        # Call the listings service and users service APIs (public-api acts as a client)
-        listingsURL = LISTINGS_URL
-        usersURL = USERS_URL
-
-        if user_id is not None:
-            listingParams = {"user_id": user_id}
-            listingsURL = url_concat(listingsURL, listingParams)
-            usersURL = usersURL + "/" + str(user_id)
-
-        # TODO: Refactor 
+        # TODO: Refactor
         # There are two ways that I can think to join Listings and Users based on the user_id
         # 1. For every listing, call an API to fetch the user with the specific user_id
         #       Limitation: need to call an API multiple times
@@ -64,35 +55,44 @@ class ListingsHandler(BaseHandler):
 
         http_client = AsyncHTTPClient()
         if user_id is not None:
+            # Preparing URL parameters
+            listingParams = {"user_id": user_id}
+            listingsURL = url_concat(LISTING_URL, listingParams)
+            userURL = USERS_URL + "/" + str(user_id)
+
             listingsResp, usersResp = yield [http_client.fetch(listingsURL), http_client.fetch(usersURL)]
             listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
             user = json.loads(usersResp.body.decode('utf-8'))['user']
+
             for listing in listings:
                 listing['user'] = user
         else:
-            listingsResp = yield http_client.fetch(listingsURL)
+            listingsResp = yield http_client.fetch(LISTINGS_URL)
             listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
+
             for listing in listings:
+                usersURL = USERS_URL + "/" + str(listing['user_id'])
                 userResp = yield http_client.fetch(USERS_URL + "/" + str(listing['user_id']))
                 user = json.loads(userResp.body.decode('utf-8'))['user']
                 listing['user'] = user
 
         http_client.close()
+        self.write_json({"result": True, "listings": listings})
         # If there is no user under that user_id - Foreign key constraints is violated
 
-    @tornado.gen.coroutine
-    def sync_fetch_gen(url):
-        http_client = AsyncHTTPClient()
-        response = yield http_client.fetch(url)
-        # TODO: Close it maybe?
-        raise gen.Return(response.body)
+    # TODO: DELETE IF NOT IN USE
+    # @tornado.gen.coroutine
+    # def sync_fetch_gen(url):
+    #     http_client = AsyncHTTPClient()
+    #     response = yield http_client.fetch(url)
+    #     raise gen.Return(response.body)
 
-    @tornado.gen.coroutine
-    def parallel_fetch(listingsURL, usersURL):
-        http_client = AsyncHTTPClient()
-        listingsResp, usersResp = yield [http_client.fetch(listingsURL),
-                                         http_client.fetch(usersURL)]
-        return gen.Return(listingsResp.body, usersResp.body)
+    # @tornado.gen.coroutine
+    # def parallel_fetch(listingsURL, usersURL):
+    #     http_client = AsyncHTTPClient()
+    #     listingsResp, usersResp = yield [http_client.fetch(listingsURL),
+    #                                      http_client.fetch(usersURL)]
+    #     return gen.Return(listingsResp.body, usersResp.body)
     
     @tornado.gen.coroutine
     def post(self):
