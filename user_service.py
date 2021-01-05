@@ -140,9 +140,6 @@ class UserHandler(BaseHandler):
                 self.write_json({"result": False, "errors": "invalid id"}, status_code=400)
                 return
         
-        # Building select statement
-        select_stmt = "SELECT * FROM users WHERE id=?"
-
         args = (id,)
         cursor = self.application.db.cursor()
         results = cursor.execute("SELECT * FROM users WHERE id=?", args)
