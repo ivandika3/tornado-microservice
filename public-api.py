@@ -1,8 +1,8 @@
 import tornado.web
 import tornado.log
 import tornado.options
-import tornado.httpclient.AsyncHTTPClient
-import tornado.httputil import url_concat
+from tornado.httpclient import AsyncHTTPClient
+from tornado.httputil import url_concat
 import logging
 import json
 
@@ -52,10 +52,12 @@ class ListingsHandler(BaseHandler):
 
         if user_id is not None:
             listingParams = {"user_id": user_id}
-            listingsURL = url_concat(LISTINGS_URL, params)
-            usersURL = USERS_URL + str(user_id)
+            listingsURL = url_concat(listingsURL, params)
+            usersURL = usersURL + "/" + str(user_id)
 
-        listingsResp, usersResp = parallel_fetch_id(listingsURL, usersURL)
+        listingsResp, usersResp = parallel_fetch(listingsURL, usersURL)
+        print(listingsResp)
+        print(usersResp)
 
         # If there is no user under that user_id - Foreign key constraints is violated
 
@@ -73,17 +75,19 @@ class ListingsHandler(BaseHandler):
 
     @tornado.gen.coroutine
     def post(self):
+        self.write_json({"result": False, "errors": "not implemented yet"}, status_code=400)
 
     
 
 class UsersHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
+        self.write_json({"result": False, "errors": "not implemented yet"}, status_code=400)
 
 
 # Path to the request handler
 def make_app(options):
-    return App([
+    return tornado.web.Application([
         (r"/public-api/listings", ListingsHandler),
         (r"/public-api/users", UsersHandler),
     ], debug=options.debug)
