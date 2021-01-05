@@ -8,8 +8,8 @@ import json
 
 # TODO: use env
 # CONSTANTS
-LISTINGS_URL = "http://127.0.0.1/6000/"
-USERS_URL = "http://127.0.0.1/8000"
+LISTINGS_URL = "http://localhost:6000/listings"
+USERS_URL = "http://localhost:8000/users"
 
 class BaseHandler(tornado.web.RequestHandler):
     def write_json(self, obj, status_code=200):
@@ -52,12 +52,17 @@ class ListingsHandler(BaseHandler):
 
         if user_id is not None:
             listingParams = {"user_id": user_id}
-            listingsURL = url_concat(listingsURL, params)
+            listingsURL = url_concat(listingsURL, listingParams)
             usersURL = usersURL + "/" + str(user_id)
 
-        listingsResp, usersResp = parallel_fetch(listingsURL, usersURL)
-        print(listingsResp)
-        print(usersResp)
+        http_client = AsyncHTTPClient()
+        listingsResp, usersResp = yield [http_client.fetch(listingsURL), http_client.fetch(usersURL)]
+        print("Listings")
+        print(listingsResp.body)
+
+        print("Users")
+        print(usersResp.body)
+        http_client.close()
 
         # If there is no user under that user_id - Foreign key constraints is violated
 
@@ -65,13 +70,15 @@ class ListingsHandler(BaseHandler):
     def sync_fetch_gen(url):
         http_client = AsyncHTTPClient()
         response = yield http_client.fetch(url)
+        # TODO: Close it maybe?
         raise gen.Return(response.body)
 
-    # If the user_id param is supplied
     @tornado.gen.coroutine
-    def parallel_fetch_id(listingsURL, usersURL):
+    def parallel_fetch(listingsURL, usersURL):
+        http_client = AsyncHTTPClient()
         listingsResp, usersResp = yield [http_client.fetch(listingsURL),
                                          http_client.fetch(usersURL)]
+        return listingsResp, usersResp
 
     @tornado.gen.coroutine
     def post(self):
