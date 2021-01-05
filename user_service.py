@@ -90,5 +90,5 @@ class UsersHandler(BaseHandler):
             }
             users.append(user)
         
-        self.write_json({"result": True, "listings": listings})
+        self.write_json({"result": True, "users": users})
 
