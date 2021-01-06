@@ -51,7 +51,6 @@ class ListingsHandler(BaseHandler):
         except:
             logging.exception("Error while parsing page_num: {}".format(page_num))
             self.write_json({"result": False, "errors": "invalid page_num"}, status_code=400)
-            print("after writing")
             return
 
         try:

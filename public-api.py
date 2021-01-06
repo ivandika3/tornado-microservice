@@ -85,8 +85,8 @@ class ListingsHandler(BaseHandler):
                     user = userJSON['user']
                     listing['user'] = user
         except Exception as e:
-            http_client.close()
             self.write_json({"result": False, "errors": str(e)}, status_code=400)
+            http_client.close()
             return
         finally: 
             http_client.close()
@@ -126,8 +126,6 @@ class ListingsHandler(BaseHandler):
         self.write_json({"result": True, "listing": listing}, status_code=200)
 
 
-    
-
 class UsersHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
@@ -144,10 +142,6 @@ class UsersHandler(BaseHandler):
         finally: 
             http_client.close()
         self.write_json({"result" : True, "user" : user}, status_code=200)
-
-
-
-
 
 
 # Path to the request handler
