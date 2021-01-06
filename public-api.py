@@ -24,27 +24,6 @@ class ListingsHandler(BaseHandler):
         page_num = self.get_argument("page_num", 1)
         page_size = self.get_argument("page_size", 10)
         user_id = self.get_argument("user_id", None)
-        # try:
-        #     page_num = int(page_num)
-        # except:
-        #     logging.exception("Error while parsing page_num: {}".format(page_num))
-        #     self.write_json({"result": False, "errors": "invalid page_num"}, status_code=400)
-        #     return
-
-        # try:
-        #     page_size = int(page_size)
-        # except:
-        #     logging.exception("Error while parsing page_size: {}".format(page_size))
-        #     self.write_json({"result": False, "errors": "invalid page_size"}, status_code=400)
-        #     return
-        
-        # if user_id is not None:
-        #     try:
-        #         user_id = int(user_id)
-        #     except:
-        #         self.write_json({"result": False, "errors": "invalid user_id"}, status_code=400)
-        #         return
-        
 
         # TODO: Refactor
         # There are two approaches that I can think of to join Listings and Users based on the user_id
