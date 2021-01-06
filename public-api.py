@@ -46,7 +46,7 @@ class ListingsHandler(BaseHandler):
                 return
 
         # TODO: Refactor
-        # There are two ways that I can think to join Listings and Users based on the user_id
+        # There are two approaches that I can think of to join Listings and Users based on the user_id
         # 1. For every listing, call an API to fetch the user with the specific user_id
         #       Limitation: need to call an API multiple times
         # 2. Use cache to store the user information so that we don't have to fetch the user for each listing
@@ -83,8 +83,8 @@ class ListingsHandler(BaseHandler):
             http_client.close()
             self.write_json({"result": False, "errors": str(e)}, status_code=404)
             return
-
-        http_client.close()
+        finally: 
+            http_client.close()
         self.write_json({"result": True, "listings": listings}, status_code=200)
 
     # TODO: DELETE IF NOT IN USE
@@ -116,7 +116,8 @@ class ListingsHandler(BaseHandler):
             http_client.close()
             self.write_json({"result": False, "errors": str(e)}, status_code=400)
             return
-        http_client.close()
+        finally: 
+            http_client.close()
         self.write_json({"result": True, "listing": listing}, status_code=200)
 
 
@@ -135,7 +136,8 @@ class UsersHandler(BaseHandler):
             http_client.close()
             self.write_json({"result": False, "errors": str(e)}, status_code=400)
             return
-        http_client.close()
+        finally: 
+            http_client.close()
         self.write_json({"result" : True, "user" : user}, status_code=200)
 
 
