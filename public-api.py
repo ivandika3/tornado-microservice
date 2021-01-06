@@ -23,6 +23,7 @@ class ListingsHandler(BaseHandler):
         # Parsing pagination params
         page_num = self.get_argument("page_num", 1)
         page_size = self.get_argument("page_size", 10)
+        user_id = self.get_argument("user_id", None)
         # try:
         #     page_num = int(page_num)
         # except:
@@ -37,7 +38,6 @@ class ListingsHandler(BaseHandler):
         #     self.write_json({"result": False, "errors": "invalid page_size"}, status_code=400)
         #     return
         
-        # user_id = self.get_argument("user_id", None)
         # if user_id is not None:
         #     try:
         #         user_id = int(user_id)
@@ -59,20 +59,21 @@ class ListingsHandler(BaseHandler):
             if user_id is not None:
                 # Preparing URL parameters
                 listingParams = {"user_id": user_id, "page_num": page_num, "page_size": page_size}
-                listingsURL = url_concat(LISTING_URL, listingParams)
+                listingsURL = url_concat(LISTINGS_URL, listingParams)
                 userURL = USERS_URL + "/" + str(user_id)
-
-                listingsResp, usersResp = yield [http_client.fetch(listingsURL), http_client.fetch(usersURL)]
+                listingsResp, usersResp = yield [http_client.fetch(listingsURL, raise_error=False), http_client.fetch(userURL, raise_error=False)]
 
                 listingsJSON = json.loads(listingsResp.body.decode('utf-8'))
                 if not listingsJSON['result']:
                     http_client.close()
-                    self.write_json(listingsJSON)
+                    self.write_json(listingsJSON, status_code=400)
+                    return
 
                 userJSON = json.loads(usersResp.body.decode('utf-8'))
-                if not userJSON['user']:
+                if not userJSON['result']:
                     http_client.close()
-                    self.write_json(userJSON)
+                    self.write_json(userJSON, status_code=400)
+                    return
                 
                 listings = listingsJSON['listings']
                 user = userJSON['user'] 
@@ -81,30 +82,32 @@ class ListingsHandler(BaseHandler):
                 for listing in listings:
                     listing['user'] = user
             else:
-                listingParams = {"page_num": page_num, "page_size": page_size}
-                listingsURL = url_concat(LISTING_URL, listingParams)
-                listingsResp = yield http_client.fetch(listingURL)
+                listingsParams = {"page_num": page_num, "page_size": page_size}
+                listingsURL = url_concat(LISTINGS_URL, listingsParams)
+                listingsResp = yield http_client.fetch(listingsURL, raise_error=False)
                 listingsJSON = json.loads(listingsResp.body.decode('utf-8'))
 
                 if not listingsJSON['result']:
                     http_client.close()
                     self.write_json(listingsJSON)
+                    return
                 listings = listingsJSON['listings']
 
                 for listing in listings:
                     usersURL = USERS_URL + "/" + str(listing['user_id'])
-                    userResp = yield http_client.fetch(USERS_URL + "/" + str(listing['user_id']))
+                    userResp = yield http_client.fetch(USERS_URL + "/" + str(listing['user_id']), raise_error=False)
 
                     userJSON = json.loads(userResp.body.decode('utf-8'))
-                    if not userJSON['user']:
+                    if not userJSON['result']:
                         http_client.close()
-                        self.write_json(userJSON)
+                        self.write_json(userJSON, status_code=400)
+                        return
 
                     user = userJSON['user']
                     listing['user'] = user
         except Exception as e:
             http_client.close()
-            self.write_json({"result": False, "errors": str(e)}, status_code=404)
+            self.write_json({"result": False, "errors": str(e)}, status_code=400)
             return
         finally: 
             http_client.close()
@@ -133,7 +136,7 @@ class ListingsHandler(BaseHandler):
                         "listing_type" : self.get_argument("listing_type"),
                         "price" : self.get_argument("price")}
             body = urllib.parse.urlencode(post_data)
-            listingResp = yield http_client.fetch(LISTINGS_URL, method="POST", headers=None, body=body)
+            listingResp = yield http_client.fetch(LISTINGS_URL, method="POST", headers=None, body=body, raise_error=False)
             listing = json.loads(listingResp.body.decode('utf-8'))['listing']
         except Exception as e:
             http_client.close()
@@ -153,7 +156,7 @@ class UsersHandler(BaseHandler):
         try:
             post_data = { "name" : self.get_argument("name")}
             body = urllib.parse.urlencode(post_data)
-            userResp = yield http_client.fetch(USERS_URL, method="POST", headers=None, body=body)
+            userResp = yield http_client.fetch(USERS_URL, method="POST", headers=None, body=body, raise_error=False)
             user = json.loads(userResp.body.decode('utf-8'))['user']
         except Exception as e:
             http_client.close()
