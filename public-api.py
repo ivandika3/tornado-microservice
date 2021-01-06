@@ -112,13 +112,12 @@ class ListingsHandler(BaseHandler):
             body = urllib.parse.urlencode(post_data)
             listingResp = yield http_client.fetch(LISTINGS_URL, method="POST", headers=None, body=body)
             listing = json.loads(listingResp.body.decode('utf-8'))['listing']
-
         except Exception as e:
             http_client.close()
             self.write_json({"result": False, "errors": str(e)}, status_code=400)
             return
         http_client.close()
-        self.write_json({"result": True, "listing": listing})
+        self.write_json({"result": True, "listing": listing}, status_code=200)
 
 
     
@@ -126,7 +125,20 @@ class ListingsHandler(BaseHandler):
 class UsersHandler(BaseHandler):
     @tornado.gen.coroutine
     def post(self):
-        self.write_json({"result": False, "errors": "not implemented yet"}, status_code=400)
+        http_client = AsyncHTTPClient()
+        try:
+            post_data = { "name" : self.get_argument("name")}
+            body = urllib.parse.urlencode(post_data)
+            userResp = yield http_client.fetch(USERS_URL, method="POST", headers=None, body=body)
+            user = json.loads(userResp.body.decode('utf-8'))['user']
+        except Exception as e:
+            http_client.close()
+            self.write_json({"result": False, "errors": str(e)}, status_code=400)
+            return
+        http_client.close()
+        self.write_json({"result" : True, "user" : user}, status_code=200)
+
+
 
 # TODO: Remove if not in use
 class InvalidUserIDError(Exception):
