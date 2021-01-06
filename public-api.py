@@ -92,20 +92,6 @@ class ListingsHandler(BaseHandler):
             http_client.close()
         self.write_json({"result": True, "listings": listings}, status_code=200)
 
-    # TODO: DELETE IF NOT IN USE
-    # @tornado.gen.coroutine
-    # def sync_fetch_gen(url):
-    #     http_client = AsyncHTTPClient()
-    #     response = yield http_client.fetch(url)
-    #     raise gen.Return(response.body)
-
-    # @tornado.gen.coroutine
-    # def parallel_fetch(listingsURL, usersURL):
-    #     http_client = AsyncHTTPClient()
-    #     listingsResp, usersResp = yield [http_client.fetch(listingsURL),
-    #                                      http_client.fetch(usersURL)]
-    #     return gen.Return(listingsResp.body, usersResp.body)
-    
     @tornado.gen.coroutine
     def post(self):
         http_client = AsyncHTTPClient()
