@@ -5,6 +5,7 @@ from tornado.httpclient import AsyncHTTPClient
 from tornado.httputil import url_concat
 import logging
 import json
+import urllib
 
 # TODO: use env
 LISTINGS_URL = "http://localhost:6000/listings"
@@ -102,7 +103,23 @@ class ListingsHandler(BaseHandler):
     
     @tornado.gen.coroutine
     def post(self):
-        self.write_json({"result": False, "errors": "not implemented yet"}, status_code=400)
+        http_client = AsyncHTTPClient()
+        try :
+            # Collecting required params
+            post_data = { "user_id" : self.get_argument("user_id"), 
+                        "listing_type" : self.get_argument("listing_type"),
+                        "price" : self.get_argument("price")}
+            body = urllib.parse.urlencode(post_data)
+            listingResp = yield http_client.fetch(LISTINGS_URL, method="POST", headers=None, body=body)
+            listing = json.loads(listingResp.body.decode('utf-8'))['listing']
+
+        except Exception as e:
+            http_client.close()
+            self.write_json({"result": False, "errors": str(e)}, status_code=400)
+            return
+        http_client.close()
+        self.write_json({"result": True, "listing": listing})
+
 
     
 
