@@ -23,27 +23,28 @@ class ListingsHandler(BaseHandler):
         # Parsing pagination params
         page_num = self.get_argument("page_num", 1)
         page_size = self.get_argument("page_size", 10)
-        try:
-            page_num = int(page_num)
-        except:
-            logging.exception("Error while parsing page_num: {}".format(page_num))
-            self.write_json({"result": False, "errors": "invalid page_num"}, status_code=400)
-            return
+        # try:
+        #     page_num = int(page_num)
+        # except:
+        #     logging.exception("Error while parsing page_num: {}".format(page_num))
+        #     self.write_json({"result": False, "errors": "invalid page_num"}, status_code=400)
+        #     return
 
-        try:
-            page_size = int(page_size)
-        except:
-            logging.exception("Error while parsing page_size: {}".format(page_size))
-            self.write_json({"result": False, "errors": "invalid page_size"}, status_code=400)
-            return
+        # try:
+        #     page_size = int(page_size)
+        # except:
+        #     logging.exception("Error while parsing page_size: {}".format(page_size))
+        #     self.write_json({"result": False, "errors": "invalid page_size"}, status_code=400)
+        #     return
         
-        user_id = self.get_argument("user_id", None)
-        if user_id is not None:
-            try:
-                user_id = int(user_id)
-            except:
-                self.write_json({"result": False, "errors": "invalid user_id"}, status_code=400)
-                return
+        # user_id = self.get_argument("user_id", None)
+        # if user_id is not None:
+        #     try:
+        #         user_id = int(user_id)
+        #     except:
+        #         self.write_json({"result": False, "errors": "invalid user_id"}, status_code=400)
+        #         return
+        
 
         # TODO: Refactor
         # There are two approaches that I can think of to join Listings and Users based on the user_id
@@ -57,28 +58,50 @@ class ListingsHandler(BaseHandler):
         try :
             if user_id is not None:
                 # Preparing URL parameters
-                listingParams = {"user_id": user_id}
+                listingParams = {"user_id": user_id, "page_num": page_num, "page_size": page_size}
                 listingsURL = url_concat(LISTING_URL, listingParams)
                 userURL = USERS_URL + "/" + str(user_id)
 
                 listingsResp, usersResp = yield [http_client.fetch(listingsURL), http_client.fetch(usersURL)]
-                listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
-                user = json.loads(usersResp.body.decode('utf-8'))['user']
+
+                listingsJSON = json.loads(listingsResp.body.decode('utf-8'))
+                if not listingsJSON['result']:
+                    http_client.close()
+                    self.write_json(listingsJSON)
+
+                userJSON = json.loads(usersResp.body.decode('utf-8'))
+                if not userJSON['user']:
+                    http_client.close()
+                    self.write_json(userJSON)
+                
+                listings = listingsJSON['listings']
+                user = userJSON['user'] 
                 # TODO: If there is no user under that user_id - Foreign key constraints is violated
 
                 for listing in listings:
                     listing['user'] = user
             else:
-                listingsResp = yield http_client.fetch(LISTINGS_URL)
-                listings = json.loads(listingsResp.body.decode('utf-8'))['listings']
+                listingParams = {"page_num": page_num, "page_size": page_size}
+                listingsURL = url_concat(LISTING_URL, listingParams)
+                listingsResp = yield http_client.fetch(listingURL)
+                listingsJSON = json.loads(listingsResp.body.decode('utf-8'))
+
+                if not listingsJSON['result']:
+                    http_client.close()
+                    self.write_json(listingsJSON)
+                listings = listingsJSON['listings']
 
                 for listing in listings:
                     usersURL = USERS_URL + "/" + str(listing['user_id'])
                     userResp = yield http_client.fetch(USERS_URL + "/" + str(listing['user_id']))
 
-                    user = json.loads(userResp.body.decode('utf-8'))['user']
-                    listing['user'] = user
+                    userJSON = json.loads(userResp.body.decode('utf-8'))
+                    if not userJSON['user']:
+                        http_client.close()
+                        self.write_json(userJSON)
 
+                    user = userJSON['user']
+                    listing['user'] = user
         except Exception as e:
             http_client.close()
             self.write_json({"result": False, "errors": str(e)}, status_code=404)
@@ -142,13 +165,7 @@ class UsersHandler(BaseHandler):
 
 
 
-# TODO: Remove if not in use
-class InvalidUserIDError(Exception):
-    # Exception raised when listings refer to user_id that does not exist
-    # Acts as a foreign key constraint checker
 
-    def __init__(self, message="One or more entries in listings are referring to user_id that does not exist."):
-        self.message = message
 
 
 # Path to the request handler
