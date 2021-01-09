@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  listing:
+    build:
+      context: ./dockerfiles/listing_service
+    image: python:3.7
+    container_name: listing
+    restart: unless-stopped
+    ports:
+      - 6000:6000
+    networks:
+      - app-network
+  
+  user:
+    build:
+      context: ./dockerfiles/user_service
+    image: python:3.7
+    container_name: user
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    networks:
+      - app-network
+  
+  public-api:
+    build:
+      context: ./dockerfiles/public-api
+    image: python:3.7
+    container_name: public-api
+    restart: unless-stopped
+    ports:
+      - 7000:7000
+    depends_on:
+      - listing
+      - user
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
