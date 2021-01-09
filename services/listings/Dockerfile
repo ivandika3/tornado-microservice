@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r python-libs.txt
 COPY listing_service.py .
 COPY listings.db .
 
-ENTRYPOINT ["python3", "listing_service.py"]
+CMD ["python3", "listing_service.py"]

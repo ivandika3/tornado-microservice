@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r python-libs.txt
 
 COPY public-api.py .
 
-ENTRYPOINT ["python3", "public-api.py"]
+CMD ["python3", "public-api.py"]

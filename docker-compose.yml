@@ -2,38 +2,31 @@ version: '3'
 
 services:
   listing:
-    build:
-      context: ./services/listings
-    image: python:3.7-alpine
-    container_name: listing
-    restart: unless-stopped
+    container_name: listing-service
+    build: ./services/listings
     ports:
-      - 6000:6000
+      - "6000:6000"
     networks:
       - app-network
   
   user:
-    build:
-      context: ./services/users
-    image: python:3.7-alpine
-    container_name: user
-    restart: unless-stopped
+    container_name: user-service
+    build: ./services/users
     ports:
-      - 8000:8000
+      - "8000:8000"
     networks:
       - app-network
   
   public-api:
-    build:
-      context: ./services/public-api
-    image: python:3.7-alpine
-    container_name: public-api
-    restart: unless-stopped
+    container_name: public-api-service
+    build: ./services/public-api
     ports:
-      - 7000:7000
+      - "7000:7000"
     depends_on:
-      - listing
-      - user
+      listing:
+        condition: service_started
+      user:
+        condition: service_started
     networks:
       - app-network
 

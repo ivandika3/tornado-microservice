@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r python-libs.txt
 COPY user_service.py .
 COPY users.db .
 
-ENTRYPOINT ["python3", "user_service.py"]
+CMD ["python3", "user_service.py"]
