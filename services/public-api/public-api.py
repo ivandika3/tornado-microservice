@@ -1,3 +1,4 @@
+import os
 import tornado.web
 import tornado.log
 import tornado.options
@@ -8,8 +9,12 @@ import json
 import urllib
 
 # TODO: use env
-LISTINGS_URL = "http://localhost:6000/listings"
-USERS_URL = "http://localhost:8000/users"
+LISTINGS_URL = os.getenv('LISTINGS_URL')
+USERS_URL = os.getenv('USERS_URL')
+if LISTINGS_URL is None:
+    LISTINGS_URL = "http://localhost:6000/listings"
+if USERS_URL is None:
+    USERS_URL = "http://localhost:8000/users"
 
 class BaseHandler(tornado.web.RequestHandler):
     def write_json(self, obj, status_code=200):
