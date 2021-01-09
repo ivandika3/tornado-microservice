@@ -3,8 +3,8 @@ version: '3'
 services:
   listing:
     build:
-      context: ./dockerfiles/listing_service
-    image: python:3.7
+      context: ./services/listings
+    image: python:3.7-alpine
     container_name: listing
     restart: unless-stopped
     ports:
@@ -14,8 +14,8 @@ services:
   
   user:
     build:
-      context: ./dockerfiles/user_service
-    image: python:3.7
+      context: ./services/users
+    image: python:3.7-alpine
     container_name: user
     restart: unless-stopped
     ports:
@@ -25,8 +25,8 @@ services:
   
   public-api:
     build:
-      context: ./dockerfiles/public-api
-    image: python:3.7
+      context: ./services/public-api
+    image: python:3.7-alpine
     container_name: public-api
     restart: unless-stopped
     ports:
