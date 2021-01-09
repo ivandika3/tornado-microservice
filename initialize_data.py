@@ -14,9 +14,11 @@ def create_connection(db_file):
 
 def init_listings_db(conn):
     cursor = conn.cursor()
+    # Delete table if exists
+    cursor.execute("DROP TABLE IF EXISTS 'listings';")    
     # Create table
     cursor.execute(
-        "CREATE TABLE IF NOT EXISTS 'listings' ("
+        "CREATE TABLE 'listings' ("
         + "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
         + "user_id INTEGER NOT NULL,"
         + "listing_type TEXT NOT NULL,"
@@ -29,9 +31,11 @@ def init_listings_db(conn):
 
 def init_users_db(conn):
     cursor = conn.cursor()
+    # Delete table if exists
+    cursor.execute("DROP TABLE IF EXISTS 'users';")
     # Create table
     cursor.execute(
-        "CREATE TABLE IF NOT EXISTS 'users' ("
+        "CREATE TABLE 'users' ("
         + "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
         + "name TEXT NOT NULL,"
         + "created_at INTEGER NOT NULL,"
