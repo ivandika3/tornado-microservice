@@ -244,14 +244,26 @@ Response:
 }
 ```
 
-## Requirements
-The listing service has been built already. You need to build the remaining two components: the user service and the public API layer. The implementation of the listing service can serve as a good starting point to learn more about how to structure a web application using the Tornado web framework.
 
-The first priority would be to get a working system up and running! A great submission would demonstrate a grasp of the principles of microservice architecture.
 
-You are required to use tornado's built in framework for HTTP request.
+# Write-up: Ivan Andika Lie
 
-## Setup
+### Microservice Architecture and Explanations
+
+The microservice architecture consists of three services: Listing Service, User Service, and Public-API Service which is stored under `/services` directory. The diagram of the architecture is illustrated below:
+
+![Architecture diagram cannot be displayed](public/99coBackend.png "Simple microservice architecture")
+
+Ideally, users should only access services through the Public-API endpoints. However, due to challenge requirements, users may send HTTP requests to both Users Service API and Listings Service API. Both Users Service and Listings Service have their own database that can only be accessed by the service it is attached to. For example, Public API Service must not access users.db and listings.db directly. Instead, it needs to interact with the services' API instead. 
+
+However, this poses additional complexities when queriying joined data. Since databases are only isolated to their respective service, if we want to get data that requires joins between users.db and listings.db. We need to call each service's API to get data from each of the database and join them manually. For example the call to `GET /public-api/listings` requires us to fetch all the queried listings from Listings Service first, before we fetch the user for each of the listing.
+
+Nevertheless, microservice architecture has benefits in building indepedent components that can be independently deployable and scalable, with each service having firm module boundary. Hence, any change in one service would not adversely affect other services (unlike monolith architecture). Moreover, each development team takes full responsibility of service they are in charge of over its full life time, compared to project-based approach where a project team is disbanded when the project has been completed.
+
+
+
+
+## Updated Setup
 We will be using Python 3 for this exercise.
 
 ### Install pip
@@ -259,6 +271,11 @@ pip is a handy tool to install libraries/dependencies for your python programs. 
 
 ### Install virtualenv
 We use virtualenv to create an isolated running environment to install dependencies and launch the web application. Head over to https://virtualenv.pypa.io/en/stable/installation/ for instructions to install virtualenv.
+
+### Install Docker and Docker Compose (Optional)
+Docker and Docker Compose would be used as one of two ways to start the application. It provides easier setup for the user. Head over to https://docs.docker.com/get-docker/ for docker installation and https://docs.docker.com/compose/install/ to for Docker Compose Installation.
+
+The instruction to run the Docker commands will be explained later.
 
 ### Install dependencies
 Once you have pip and virtualenv set up, we can proceed to create the environment to run our web applications:
@@ -283,27 +300,111 @@ backports-abc==0.4
 tornado==4.4.2
 ```
 
+# Running the application
+
+## Initialize database
+
+We will populate the database with random data that is generated using the script `initialize_data.py`. To run the script, go to the root project directory and run the command below:
+```bash
+# Initialize the database and populate the listings and users database
+python initialize_data.py
+```
+
+There are two ways to run the application:
+1. Running the services manually 
+2. Docker and Docker Compose 
+
+We will explore how to start the services in both approaches.
+
+## 1. Running the services manually
+
 ### Run the listing service
-Now we're all set to run the listing service!
+When we are at the project root directory, run the command below:
 
 ```bash
 # Run the listing service
-python listing_service.py --port=6000 --debug=true
+python ./services/listings/listing_service.py --port=6000 --debug=true
 ```
 The following settings that can be configured via command-line arguments when starting the app:
 
 - `port`: The port number to run the application on (default: `6000`)
 - `debug`: Runs the application in debug mode. Applications running in debug mode will automatically reload in response to file changes. (default: `true`)
 
-### Create listings
-Time to add some data into the listing service!
+### Run the user service
+When we are at the project root directory, run the command below:
 
 ```bash
-curl localhost:6000/listings -XPOST \
-    -d user_id=1 \
-    -d listing_type=rent \
-    -d price=4500
+# Run the users service
+python ./services/users/user_service.py --port=8000 --debug=true
 ```
+The following settings that can be configured via command-line arguments when starting the app:
+
+- `port`: The port number to run the application on (default: `8000`)
+- `debug`: Runs the application in debug mode. Applications running in debug mode will automatically reload in response to file changes. (default: `true`)
+
+### Run the public API service
+> Public API Service assumes that Listings Service is hosted on port 6000 and Users Service is hosted on port 8000.
+
+When we are at the project root directory, run the command below:
+
+```bash
+# Run the public API service
+python ./services/users/public-api.py --port=7000 --debug=true
+```
+The following settings that can be configured via command-line arguments when starting the app:
+
+- `port`: The port number to run the application on (default: `7000`)
+- `debug`: Runs the application in debug mode. Applications running in debug mode will automatically reload in response to file changes. (default: `true`)
+
+The services have been set up and we can submit HTTP request using `curl` command or other means (applications such as Postman)
+
+## 2. Docker and Docker Compose
+
+Docker provides an containerization technology that allows us to run the same application in an isolated environment which is not affected by the host OS configuration, but still faster than virtual machine. Docker Compose is a tool for defining and running multi-container Docker applications. With Compose, we can use a YAML file to configure the applciation's services and start them in one go.
+
+Under `/services` directory, each service has its own directory. Inside each service's directory, there is a Dockerfile that describes how to configure a container to run the specific service. In the project root directory, `docker-compose.yml` file is provided and contains configurations about the services and how they are organized inside a isolated network.
+
+> Remember to use `sudo` before the commands for UNIX-based OS
+
+To build the application simply run the command in the project root directory (need to wait a while):
+
+`docker-compose build`
+
+We can then run the application using this command:
+
+`docker-compose up`
+
+Check whether all three services are `Up` using this command:
+
+`docker-compose ps`
+
+To check the logs written by the services, use this command:
+
+`docker-compose logs`
+
+`docker-compose logs <service name>`
+
+To follow the logs:
+
+`docker-compose logs -f` 
+
+The services have been set up and we can submit HTTP request using `curl` command or other means (applications such as Postman)
+
+### If something went wrong...
+
+If the `State` of the services are not `Up`, we can first stop and remove the containers by running commands:
+
+`docker-compose stop`
+
+`docker-compose rm`
+
+`docker system prune -a`
+
+`docker-compose build`
+
+`docker-compose up`
+
+And try to access the services
 
 ## Resources
 Useful resources to help you get started:
