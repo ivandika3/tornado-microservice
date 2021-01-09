@@ -46,9 +46,6 @@ def init_users_db(conn):
 
 def insert_random_users(conn, num):
     insert_names_sql = "INSERT INTO users (name, created_at, updated_at) VALUES (?, ?, ?)"
-    # insert_names_sql = "INSERT INTO 'users' "
-                        # + "('name', 'created_at', 'updated_at') "
-                        # + "VALUES (?, ?, ?)"
     cursor = conn.cursor()
     for x in range(num):
         time_now = int(time.time() * 1e6)
@@ -59,9 +56,6 @@ def insert_random_users(conn, num):
 
 def insert_random_listings(conn, num):
     insert_listing_sql = "INSERT INTO listings (user_id, listing_type, price, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
-    # insert_listing_sql = "INSERT INTO 'listings' "
-                        # + "('user_id', 'listing_type', 'price', 'created_at', 'updated_at') "
-                        # + "VALUES (?, ?, ?, ?, ?)"
     cursor = conn.cursor()
     for user_id in range(1, num):
         for i in range(random.randrange(1, 5)):
@@ -75,8 +69,8 @@ def insert_random_listings(conn, num):
 
 if __name__ == "__main__":
     try:
-        listings_conn = create_connection("listings.db")
-        users_conn = create_connection("users.db")
+        listings_conn = create_connection("./services/listings/listings.db")
+        users_conn = create_connection("./services/users/users.db")
         init_listings_db(listings_conn)
         init_users_db(users_conn)
 
