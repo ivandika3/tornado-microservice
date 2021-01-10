@@ -86,7 +86,6 @@ class ListingsHandler(BaseHandler):
             args = (limit, offset)
         cursor = self.application.db.cursor()
         results = cursor.execute(select_stmt, args)
-
         listings = []
         for row in results:
             fields = ["id", "user_id", "listing_type", "price", "created_at", "updated_at"]

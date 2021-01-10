@@ -3,6 +3,7 @@ import names
 import sqlite3
 import time
 import random
+import os
 
 def create_connection(db_file):
     conn = None
@@ -76,6 +77,8 @@ if __name__ == "__main__":
 
         insert_random_listings(listings_conn, 50)
         insert_random_users(users_conn, 50)
+        os.chmod("./services/listings/listings.db", 0o644)
+        os.chmod("./services/users/users.db", 0o644)
     except Exception as e:
         print ("Error: ", str(e))
 

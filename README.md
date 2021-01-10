@@ -318,6 +318,8 @@ We will explore how to start the services in both approaches.
 
 ## 1. Running the services manually
 
+Each service needs to be run in separate terminal.
+
 ### Run the listing service
 When we are at the project root directory, run the command below:
 
@@ -349,7 +351,7 @@ When we are at the project root directory, run the command below:
 
 ```bash
 # Run the public API service
-python ./services/users/public-api.py --port=7000 --debug=true
+python ./services/public-api/public-api.py --port=7000 --debug=true
 ```
 The following settings that can be configured via command-line arguments when starting the app:
 
