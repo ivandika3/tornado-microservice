@@ -305,9 +305,17 @@ tornado==4.4.2
 ## Initialize database
 
 We will populate the database with random data that is generated using the script `initialize_data.py`. To run the script, go to the root project directory and run the command below:
+
+For windows users, run the python file directly:
 ```bash
 # Initialize the database and populate the listings and users database
 python initialize_data.py
+```
+
+For Linux or iOS, run the bash script with the same name:
+```bash
+# Initialize the database and populate the listings and users database
+sh initialize_data.sh
 ```
 
 There are two ways to run the application:
