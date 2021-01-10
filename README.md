@@ -376,7 +376,7 @@ Under `/services` directory, each service has its own directory. Inside each ser
 
 > Remember to use `sudo` before the commands for UNIX-based OS
 
-> The database files will be copied to the docker environment. However, the change in the database in the docker environment would only be seen during the lifetime of the docker containers and not be reflected on the host db files.
+> The database files will be copied to the docker environment. However, the change in the database in the docker environment might only be seen during the lifetime of the docker containers and not be reflected on the host db files.
 
 To build the application simply run the command in the project root directory (need to wait a while):
 
