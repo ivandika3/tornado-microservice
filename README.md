@@ -319,8 +319,8 @@ sh initialize_data.sh
 ```
 
 There are two ways to run the application:
-1. Running the services manually 
-2. Docker and Docker Compose 
+1. Running the services manually (Tested in Windows and WSL2)
+2. Docker and Docker Compose (Tested on Docker running on WSL2)
 
 We will explore how to start the services in both approaches.
 
@@ -384,7 +384,7 @@ To build the application simply run the command in the project root directory (n
 
 We can then run the application using this command:
 
-`docker-compose up`
+`docker-compose up -d`
 
 Check whether all three services are `Up` using this command:
 
