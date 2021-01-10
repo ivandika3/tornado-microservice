@@ -312,7 +312,7 @@ For windows users, run the python file directly:
 python initialize_data.py
 ```
 
-For Linux or iOS, run the bash script with the same name:
+For Linux or Mac, run the bash script with the same name:
 ```bash
 # Initialize the database and populate the listings and users database
 sh initialize_data.sh
