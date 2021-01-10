@@ -30,7 +30,6 @@ class App(tornado.web.Application):
         )
         self.db.commit()
 
-# TODO: Refactor into separate file
 class BaseHandler(tornado.web.RequestHandler):
     def write_json(self, obj, status_code=200):
         self.set_header("Content-Type", "application/json")

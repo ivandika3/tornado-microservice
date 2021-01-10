@@ -8,7 +8,6 @@ import logging
 import json
 import urllib
 
-# TODO: use env
 LISTINGS_URL = os.getenv('LISTINGS_URL')
 USERS_URL = os.getenv('USERS_URL')
 if LISTINGS_URL is None:
@@ -30,7 +29,6 @@ class ListingsHandler(BaseHandler):
         page_size = self.get_argument("page_size", 10)
         user_id = self.get_argument("user_id", None)
 
-        # TODO: Refactor
         # There are two approaches that I can think of to join Listings and Users based on the user_id
         # 1. For every listing, call an API to fetch the user with the specific user_id
         #       Limitation: need to call an API multiple times
@@ -61,7 +59,6 @@ class ListingsHandler(BaseHandler):
                 
                 listings = listingsJSON['listings']
                 user = userJSON['user'] 
-                # TODO: If there is no user under that user_id - Foreign key constraints is violated
 
                 for listing in listings:
                     listing['user'] = user

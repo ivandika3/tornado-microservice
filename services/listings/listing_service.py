@@ -103,8 +103,6 @@ class ListingsHandler(BaseHandler):
         listing_type = self.get_argument("listing_type")
         price = self.get_argument("price")
         
-        #TODO: Solve when user_id, listing_type, or price are not specified
-
         # Validating inputs
         errors = []
         user_id_val = self._validate_user_id(user_id, errors)
