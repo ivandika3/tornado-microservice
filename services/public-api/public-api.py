@@ -41,6 +41,24 @@ class ListingsHandler(BaseHandler):
         else:
             print("cache hit")
         return user
+    
+    @tornado.gen.coroutine
+    def get_listings(self, user_id, page_num, page_size, http_client):
+        listingParams = {}
+        if user_id is not None:
+            listingParams = {"user_id": user_id, "page_num": page_num, "page_size": page_size}
+            userURL = USERS_URL + "/" + str(user_id)
+        else:
+            listingParams = {"page_num": page_num, "page_size": page_size}
+        listingsURL = url_concat(LISTINGS_URL, listingParams)
+        listingsResp = yield http_client.fetch(listingsURL, raise_error=False)
+        listingsJSON = json.loads(listingsResp.body.decode('utf-8'))
+        if not listingsJSON['result']:
+            http_client.close()
+            self.write_json(listingsJSON, status_code=400)
+            return
+        listings = listingsJSON['listings']
+        return listings
 
     @tornado.gen.coroutine
     def get(self):
@@ -54,22 +72,7 @@ class ListingsHandler(BaseHandler):
         # Use memcached to cache repeated user 
         memcache_client = base.Client('localhost', serde=serde.pickle_serde)
         try :
-            listingParams = {}
-            if user_id is not None:
-                listingParams = {"user_id": user_id, "page_num": page_num, "page_size": page_size}
-                userURL = USERS_URL + "/" + str(user_id)
-            else:
-                listingsParams = {"page_num": page_num, "page_size": page_size}
-
-            listingsURL = url_concat(LISTINGS_URL, listingParams)
-            listingsResp = yield http_client.fetch(listingsURL, raise_error=False)
-            listingsJSON = json.loads(listingsResp.body.decode('utf-8'))
-            if not listingsJSON['result']:
-                http_client.close()
-                self.write_json(listingsJSON, status_code=400)
-                return
-            listings = listingsJSON['listings']
-
+            listings = yield self.get_listings(user_id, page_num, page_size, http_client) 
             if user_id is not None: 
                 user = yield self.get_user(user_id, http_client, memcache_client)
             else :
