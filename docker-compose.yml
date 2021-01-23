@@ -25,13 +25,22 @@ services:
     environment:
       - LISTINGS_URL=http://listing:6000/listings
       - USERS_URL=http://user:8000/users
+      - MEMCACHED_URL=memcached
     depends_on:
       listing:
         condition: service_started
       user:
         condition: service_started
+      memcached:
+        condition: service_started
     networks:
       - app-network
+  memcached:
+    container_name: memcached
+    image: memcached:latest
+    networks:
+      - app-network
+    command: ["memcached"]
 
 networks:
   app-network:

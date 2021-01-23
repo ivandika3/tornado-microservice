@@ -12,10 +12,13 @@ import urllib
 
 LISTINGS_URL = os.getenv('LISTINGS_URL')
 USERS_URL = os.getenv('USERS_URL')
+MEMCACHED_URL = os.getenv('MEMCACHED_URL')
 if LISTINGS_URL is None:
     LISTINGS_URL = "http://localhost:6000/listings"
 if USERS_URL is None:
     USERS_URL = "http://localhost:8000/users"
+if MEMCACHED_URL is None:
+    MEMCACHED_URL = 'localhost'
 
 class BaseHandler(tornado.web.RequestHandler):
     def write_json(self, obj, status_code=200):
@@ -70,7 +73,7 @@ class ListingsHandler(BaseHandler):
        
         http_client = AsyncHTTPClient()
         # Use memcached to cache repeated user 
-        memcache_client = base.Client('localhost', serde=serde.pickle_serde)
+        memcache_client = base.Client(MEMCACHED_URL, serde=serde.pickle_serde)
         try :
             listings = yield self.get_listings(user_id, page_num, page_size, http_client) 
             if user_id is not None: 
